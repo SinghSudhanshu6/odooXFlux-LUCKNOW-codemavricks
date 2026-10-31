@@ -1,0 +1,8 @@
+{% extends "app.html" %}
+{% block title %}Taxes{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-5"><h1 class="text-2xl font-bold">Taxes</h1>{% if user.role == 'admin' %}<a class="btn btn-primary" href="{% url 'tax_create' %}">New tax</a>{% endif %}</div>
+<div class="glass panel scroll"><table class="tbl"><thead><tr><th>Name</th><th class="num">Rate</th><th>Status</th><th></th></tr></thead><tbody>
+{% for t in taxes %}<tr><td>{{ t.name }}</td><td class="num">{{ t.rate_percent }}%</td><td><span class="badge {% if t.active %}b-active{% else %}b-closed{% endif %}">{% if t.active %}Active{% else %}Inactive{% endif %}</span></td><td class="num">{% if user.role == 'admin' %}<a class="btn btn-sm" href="{% url 'tax_edit' t.pk %}">Edit</a>{% endif %}</td></tr>
+{% empty %}<tr><td colspan="4" class="muted">No taxes defined.</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "app.html" %}{% load humanize %}
+{% block title %}{{ sub.number }}{% endblock %}
+{% block content %}
+<a href="{% url 'subscription_list' %}" class="muted text-sm">&larr; Subscriptions</a>
+<div class="flex items-start justify-between flex-wrap gap-3 mt-2 mb-5">
+  <div><h1 class="text-2xl font-bold">{{ sub.number }} <span class="badge b-{{ sub.status }} align-middle">{{ sub.get_status_display }}</span></h1>
+  <p class="muted">{{ sub.customer }} · {{ sub.plan }}</p></div>
+  {% if user.role != 'customer' %}
+  <div class="flex flex-wrap gap-2">
+    {% if sub.editable %}<a class="btn" href="{% url 'subscription_edit' sub.pk %}">Edit</a>{% endif %}
+    {% if sub.status == 'draft' %}{% include "subscriptions/_act.html" with act="quote" label="Send as quotation" cls="btn-primary" %}{% endif %}
+    {% if sub.status == 'quotation' %}{% include "subscriptions/_act.html" with act="confirm" label="Confirm" cls="btn-primary" %}{% include "subscriptions/_act.html" with act="draft" label="Back to draft" cls="" %}{% endif %}
+    {% if sub.status == 'confirmed' %}{% include "subscriptions/_act.html" with act="activate" label="Activate" cls="btn-mint" %}{% endif %}
+    {% if sub.status == 'active' %}{% include "subscriptions/_act.html" with act="close" label="Close subscription" cls="btn-danger" %}{% endif %}
+    {% if sub.status == 'closed' and sub.plan.renewable %}{% include "subscriptions/_act.html" with act="renew" label="Renew" cls="btn-primary" %}{% endif %}
+  </div>{% endif %}
+</div>
+<div class="grid gap-4 md:grid-cols-4 mb-4">
+  <div class="glass panel tilt"><div class="muted text-sm">Term</div><div class="font-semibold">{{ sub.start_date|date:"d M Y" }}</div><div class="muted text-sm">to {{ sub.expiry_date|date:"d M Y" }}</div></div>
+  <div class="glass panel tilt"><div class="muted text-sm">Next invoice</div><div class="font-semibold">{{ sub.next_invoice_date|date:"d M Y"|default:"Not scheduled" }}</div></div>
+  <div class="glass panel tilt"><div class="muted text-sm">Payment terms</div><div class="font-semibold">{{ sub.payment_terms }} days</div></div>
+  <div class="glass panel tilt"><div class="muted text-sm">Per period (before tax)</div><div class="font-semibold mint">₹{{ sub.total|floatformat:2|intcomma }}</div></div>
+</div>
+<div class="glass panel scroll mb-4"><h2 class="font-semibold mb-3">Order lines</h2>
+<table class="tbl"><thead><tr><th>Product</th><th class="num">Qty</th><th class="num">Unit price</th><th>Tax</th><th class="num">Discount</th><th class="num">Amount</th></tr></thead><tbody>
+{% for l in lines %}<tr><td>{{ l.product }}{% if l.variant %}<span class="muted text-xs"> · {{ l.variant.attribute }}: {{ l.variant.value }}</span>{% endif %}</td><td class="num">{{ l.quantity }}</td><td class="num">₹{{ l.unit_price|floatformat:2|intcomma }}</td><td>{{ l.tax.name|default:"-" }}</td><td class="num">₹{{ l.discount|floatformat:2 }}</td><td class="num">₹{{ l.amount|floatformat:2|intcomma }}</td></tr>{% endfor %}</tbody></table></div>
+<div class="glass panel scroll"><h2 class="font-semibold mb-3">Invoices</h2>
+<table class="tbl"><thead><tr><th>Invoice</th><th>Period</th><th>Due</th><th>Status</th><th class="num">Total</th></tr></thead><tbody>
+{% for i in invoices %}<tr><td><a class="mint" href="{% url 'invoice_detail' i.pk %}">{{ i.number }}</a></td><td>{{ i.period_start|date:"d M" }} to {{ i.period_end|date:"d M Y" }}</td><td>{{ i.due_date|date:"d M Y" }}</td><td><span class="badge b-{{ i.display_status }}">{{ i.display_status|capfirst }}</span></td><td class="num">₹{{ i.total|floatformat:2|intcomma }}</td></tr>
+{% empty %}<tr><td colspan="5" class="muted">No invoices yet. They appear after the subscription is active and billing runs.</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "app.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<a href="{% url 'subscription_list' %}" class="muted text-sm">&larr; Subscriptions</a>
+<h1 class="text-2xl font-bold mt-2 mb-5">{{ title }}</h1>
+<form method="post" class="grid gap-4">{% csrf_token %}
+  <div class="glass panel grid gap-4 md:grid-cols-2">
+    {% for e in form.non_field_errors %}<div class="err md:col-span-2">{{ e }}</div>{% endfor %}
+    {% for f in form %}<div class="{% if f.name == 'notes' %}md:col-span-2{% endif %}"><label class="label" for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{% for e in f.errors %}<div class="err">{{ e }}</div>{% endfor %}</div>{% endfor %}
+  </div>
+  <div class="glass panel scroll">
+    <h2 class="font-semibold mb-1">Order lines</h2>
+    <p class="muted text-sm mb-3">Leave unit price blank to use the product price plus any variant extra.</p>
+    {{ formset.management_form }}
+    {% for e in formset.non_form_errors %}<div class="err mb-2">{{ e }}</div>{% endfor %}
+    <table class="tbl"><thead><tr><th>Product</th><th>Variant</th><th>Qty</th><th>Unit price</th><th>Tax</th><th>Discount</th>{% if formset.can_delete %}<th>Remove</th>{% endif %}</tr></thead><tbody>
+    {% for lf in formset %}<tr>
+      {% for h in lf.hidden_fields %}{{ h }}{% endfor %}
+      <td style="min-width:170px">{{ lf.product }}{% for e in lf.product.errors %}<div class="err">{{ e }}</div>{% endfor %}</td>
+      <td style="min-width:150px">{{ lf.variant }}{% for e in lf.variant.errors %}<div class="err">{{ e }}</div>{% endfor %}</td>
+      <td style="min-width:80px">{{ lf.quantity }}{% for e in lf.quantity.errors %}<div class="err">{{ e }}</div>{% endfor %}</td>
+      <td style="min-width:110px">{{ lf.unit_price }}</td><td style="min-width:130px">{{ lf.tax }}</td><td style="min-width:100px">{{ lf.discount }}</td>
+      {% if formset.can_delete %}<td>{{ lf.DELETE }}</td>{% endif %}</tr>{% endfor %}</tbody></table>
+  </div>
+  <div class="flex gap-3"><button class="btn btn-primary">Save subscription</button><a class="btn" href="{% url 'subscription_list' %}">Cancel</a></div>
+</form>
+{% endblock %}

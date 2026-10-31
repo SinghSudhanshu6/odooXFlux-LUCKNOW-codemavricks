@@ -1,0 +1,21 @@
+{% extends "app.html" %}{% load humanize %}
+{% block title %}Plans{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between flex-wrap gap-3 mb-5"><h1 class="text-2xl font-bold">Plans</h1>
+{% if user.role == 'admin' %}<a class="btn btn-primary" href="{% url 'plan_create' %}">New plan</a>{% endif %}</div>
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+{% for p in plans %}
+<div class="glass panel tilt">
+  <div class="flex justify-between items-start"><h2 class="display text-xl font-bold">{{ p.name }}</h2><span class="badge b-confirmed">{{ p.get_billing_period_display }}</span></div>
+  <div class="display text-3xl font-bold mint mt-3">₹{{ p.price|floatformat:0|intcomma }}<span class="muted text-sm font-normal"> / {% if p.billing_period == 'daily' %}day{% elif p.billing_period == 'weekly' %}week{% elif p.billing_period == 'monthly' %}month{% else %}year{% endif %}</span></div>
+  <ul class="text-sm muted mt-4 grid gap-1">
+    <li>Minimum quantity: {{ p.min_qty }}</li>
+    <li>{% if p.renewable %}Renewable{% else %}Not renewable{% endif %} · {% if p.closable %}closable early{% else %}fixed term{% endif %}</li>
+    {% if p.auto_close %}<li>Closes automatically at expiry</li>{% endif %}
+    {% if p.start_date or p.end_date %}<li>Available {{ p.start_date|date:"d M Y"|default:"now" }} to {{ p.end_date|date:"d M Y"|default:"open-ended" }}</li>{% endif %}
+  </ul>
+  {% if user.role == 'admin' %}<a class="btn btn-sm mt-4" href="{% url 'plan_edit' p.pk %}">Edit</a>{% endif %}
+</div>
+{% empty %}<p class="muted">No plans yet.</p>{% endfor %}
+</div>
+{% endblock %}

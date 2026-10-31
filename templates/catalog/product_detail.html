@@ -1,0 +1,23 @@
+{% extends "app.html" %}{% load humanize %}
+{% block title %}{{ product.name }}{% endblock %}
+{% block content %}
+<a href="{% url 'product_list' %}" class="muted text-sm">&larr; Products</a>
+<div class="flex items-center justify-between flex-wrap gap-3 mt-2 mb-5"><h1 class="text-2xl font-bold">{{ product.name }}</h1>
+{% if user.role == 'admin' %}<a class="btn" href="{% url 'product_edit' product.pk %}">Edit product</a>{% endif %}</div>
+<div class="grid gap-4 md:grid-cols-3 mb-4">
+  <div class="glass panel tilt"><div class="muted text-sm">Sales price</div><div class="display text-2xl font-bold">₹{{ product.sales_price|floatformat:2|intcomma }}</div></div>
+  <div class="glass panel tilt"><div class="muted text-sm">Cost price</div><div class="display text-2xl font-bold">₹{{ product.cost_price|floatformat:2|intcomma }}</div></div>
+  <div class="glass panel tilt"><div class="muted text-sm">Type</div><div class="display text-2xl font-bold">{{ product.get_product_type_display }}</div></div>
+</div>
+{% if product.notes %}<p class="muted mb-4">{{ product.notes }}</p>{% endif %}
+<div class="glass panel scroll"><h2 class="font-semibold mb-3">Variants</h2>
+<table class="tbl"><thead><tr><th>Attribute</th><th>Value</th><th class="num">Price extra</th><th></th></tr></thead><tbody>
+{% for v in product.variants.all %}<tr><td>{{ v.attribute }}</td><td>{{ v.value }}</td><td class="num">+₹{{ v.extra_price|floatformat:2|intcomma }}</td>
+<td class="num">{% if user.role == 'admin' %}<form method="post" action="{% url 'variant_delete' product.pk v.pk %}" data-confirm="Remove this variant?">{% csrf_token %}<button class="btn btn-sm btn-danger">Remove</button></form>{% endif %}</td></tr>
+{% empty %}<tr><td colspan="4" class="muted">No variants yet.</td></tr>{% endfor %}</tbody></table>
+{% if user.role == 'admin' %}
+<form method="post" class="grid gap-3 md:grid-cols-4 items-end mt-5">{% csrf_token %}
+{% for f in form %}<div><label class="label" for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{% for e in f.errors %}<div class="err">{{ e }}</div>{% endfor %}</div>{% endfor %}
+<button class="btn btn-primary">Add variant</button></form>{% endif %}
+</div>
+{% endblock %}

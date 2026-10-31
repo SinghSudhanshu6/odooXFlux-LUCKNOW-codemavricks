@@ -1,0 +1,1 @@
+<form method="post" action="{% url 'subscription_action' sub.pk act %}" {% if act == 'close' %}data-confirm="Close this subscription?"{% endif %}>{% csrf_token %}<button class="btn {{ cls }}">{{ label }}</button></form>

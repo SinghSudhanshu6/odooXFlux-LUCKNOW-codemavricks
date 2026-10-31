@@ -1,0 +1,15 @@
+{% extends "app.html" %}
+{% block title %}{{ t.name }}{% endblock %}
+{% block content %}
+<a href="{% url 'template_list' %}" class="muted text-sm">&larr; Templates</a>
+<div class="flex items-center justify-between flex-wrap gap-3 mt-2 mb-5"><div><h1 class="text-2xl font-bold">{{ t.name }}</h1><p class="muted">{{ t.plan }} · valid for {{ t.validity_days }} days</p></div>
+<a class="btn btn-primary" href="{% url 'from_template' t.pk %}">Create quotation from this</a></div>
+<div class="glass panel scroll"><h2 class="font-semibold mb-3">Lines</h2>
+<table class="tbl"><thead><tr><th>Product</th><th>Variant</th><th class="num">Qty</th></tr></thead><tbody>
+{% for l in lines %}<tr><td>{{ l.product }}</td><td>{{ l.variant.value|default:"-" }}</td><td class="num">{{ l.quantity }}</td></tr>{% empty %}<tr><td colspan="3" class="muted">No lines yet.</td></tr>{% endfor %}</tbody></table>
+{% if user.role == 'admin' %}
+<form method="post" class="grid gap-3 md:grid-cols-4 items-end mt-5">{% csrf_token %}
+{% for f in form %}<div><label class="label" for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{% for e in f.errors %}<div class="err">{{ e }}</div>{% endfor %}</div>{% endfor %}
+<button class="btn btn-primary">Add line</button></form>{% endif %}
+</div>
+{% endblock %}

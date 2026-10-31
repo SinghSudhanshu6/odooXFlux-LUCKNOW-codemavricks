@@ -1,0 +1,34 @@
+{% extends "app.html" %}
+{% load humanize %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between flex-wrap gap-3 mb-6">
+  <div><h1 class="text-2xl font-bold">Hello, {{ user.display_name }}</h1><p class="muted">Here is where recurring revenue stands today.</p></div>
+  <form method="post" action="{% url 'billing_run' %}">{% csrf_token %}<button class="btn btn-primary">Run billing now</button></form>
+</div>
+<div class="stats grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  <div class="glass panel stat tilt"><div class="muted text-sm">Monthly recurring revenue</div><div class="v mint" data-count="{{ mrr|floatformat:2 }}" data-prefix="₹">₹{{ mrr|floatformat:0|intcomma }}</div><div class="muted text-xs mt-1">ARR ₹{{ arr|floatformat:0|intcomma }}</div></div>
+  <div class="glass panel stat tilt"><div class="muted text-sm">Active subscriptions</div><div class="v" data-count="{{ active_count }}">{{ active_count }}</div><div class="muted text-xs mt-1">{{ draft_count }} draft invoice{{ draft_count|pluralize }} to review</div></div>
+  <div class="glass panel stat tilt"><div class="muted text-sm">Outstanding</div><div class="v amber" data-count="{{ outstanding|floatformat:2 }}" data-prefix="₹">₹{{ outstanding|floatformat:0|intcomma }}</div><div class="muted text-xs mt-1">on confirmed invoices</div></div>
+  <div class="glass panel stat tilt"><div class="muted text-sm">Collected, last 30 days</div><div class="v" data-count="{{ revenue30|floatformat:2 }}" data-prefix="₹">₹{{ revenue30|floatformat:0|intcomma }}</div><div class="muted text-xs mt-1">{{ overdue_count }} overdue invoice{{ overdue_count|pluralize }}</div></div>
+</div>
+<div class="grid gap-4 lg:grid-cols-3 mt-4">
+  <div class="glass panel lg:col-span-2">
+    <h2 class="font-semibold mb-4">Payments collected by month</h2>
+    {% if months %}
+    <div class="bars">{% for m in months %}<div class="flex-1 flex flex-col items-center justify-end h-full gap-1"><span class="text-xs muted">₹{{ m.t|floatformat:0|intcomma }}</span><div class="bar w-full" style="height:{{ m.pct }}%;animation-delay:{{ forloop.counter0 }}00ms"></div><span class="text-xs muted">{{ m.m|date:"M" }}</span></div>{% endfor %}</div>
+    {% else %}<p class="muted">No payments yet. Record one from a confirmed invoice.</p>{% endif %}
+  </div>
+  <div class="glass panel">
+    <h2 class="font-semibold mb-4">Overdue, oldest first</h2>
+    {% for i in overdue %}<a href="{% url 'invoice_detail' i.pk %}" class="flex justify-between py-2 border-b border-white/5 text-sm"><span>{{ i.number }}<span class="muted block text-xs">{{ i.customer.name }} · due {{ i.due_date|date:"d M" }}</span></span><span class="rose">₹{{ i.balance|floatformat:0|intcomma }}</span></a>
+    {% empty %}<p class="muted">Nothing is overdue.</p>{% endfor %}
+  </div>
+</div>
+<div class="glass panel mt-4">
+  <h2 class="font-semibold mb-3">Latest invoices</h2>
+  <div class="scroll"><table class="tbl"><thead><tr><th>Invoice</th><th>Customer</th><th>Due</th><th>Status</th><th class="num">Total</th></tr></thead><tbody>
+  {% for i in recent %}<tr><td><a class="mint" href="{% url 'invoice_detail' i.pk %}">{{ i.number }}</a></td><td>{{ i.customer.name }}</td><td>{{ i.due_date|date:"d M Y" }}</td><td><span class="badge b-{{ i.display_status }}">{{ i.display_status|capfirst }}</span></td><td class="num">₹{{ i.total|floatformat:2|intcomma }}</td></tr>
+  {% empty %}<tr><td colspan="5" class="muted">No invoices yet. Activate a subscription and run billing.</td></tr>{% endfor %}</tbody></table></div>
+</div>
+{% endblock %}

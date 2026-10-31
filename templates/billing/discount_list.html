@@ -1,0 +1,11 @@
+{% extends "app.html" %}{% load humanize %}
+{% block title %}Discounts{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-5"><h1 class="text-2xl font-bold">Discount rules</h1>{% if user.role == 'admin' %}<a class="btn btn-primary" href="{% url 'discount_create' %}">New discount</a>{% endif %}</div>
+<div class="glass panel scroll"><table class="tbl"><thead><tr><th>Name</th><th>Value</th><th>Conditions</th><th>Valid</th><th>Used</th><th></th></tr></thead><tbody>
+{% for d in discounts %}<tr><td>{{ d.name }}</td><td>{% if d.kind == 'percent' %}{{ d.value }}%{% else %}₹{{ d.value|floatformat:2|intcomma }}{% endif %}</td>
+<td class="text-sm muted">{% if d.min_purchase %}min ₹{{ d.min_purchase|floatformat:0 }} {% endif %}{% if d.min_qty %}min qty {{ d.min_qty }}{% endif %}{% if not d.min_purchase and not d.min_qty %}none{% endif %}</td>
+<td>{% if d.is_live and d.active %}<span class="badge b-active">Live</span>{% else %}<span class="badge b-closed">Stopped</span>{% endif %}<span class="muted text-xs block">{{ d.start_date|date:"d M Y"|default:"any time" }} to {{ d.end_date|date:"d M Y"|default:"open" }}</span></td>
+<td>{{ d.used_count }}{% if d.usage_limit %} / {{ d.usage_limit }}{% endif %}</td><td class="num">{% if user.role == 'admin' %}<a class="btn btn-sm" href="{% url 'discount_edit' d.pk %}">Edit</a>{% endif %}</td></tr>
+{% empty %}<tr><td colspan="6" class="muted">No discount rules yet.</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

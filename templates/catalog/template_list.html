@@ -1,0 +1,9 @@
+{% extends "app.html" %}
+{% block title %}Quotation templates{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between flex-wrap gap-3 mb-5"><h1 class="text-2xl font-bold">Quotation templates</h1>
+{% if user.role == 'admin' %}<a class="btn btn-primary" href="{% url 'template_create' %}">New template</a>{% endif %}</div>
+<div class="glass panel scroll"><table class="tbl"><thead><tr><th>Name</th><th>Plan</th><th>Valid for</th></tr></thead><tbody>
+{% for t in templates %}<tr><td><a class="mint" href="{% url 'template_detail' t.pk %}">{{ t.name }}</a></td><td>{{ t.plan }}</td><td>{{ t.validity_days }} days</td></tr>
+{% empty %}<tr><td colspan="3" class="muted">No templates yet.</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

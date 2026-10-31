@@ -1,0 +1,8 @@
+{% extends "app.html" %}
+{% block title %}Staff{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-5"><h1 class="text-2xl font-bold">Staff</h1><a class="btn btn-primary" href="{% url 'staff_create' %}">New staff member</a></div>
+<div class="glass panel scroll"><table class="tbl"><thead><tr><th>Name</th><th>Email</th><th>Active</th></tr></thead><tbody>
+{% for s in staff %}<tr><td>{{ s.display_name }}</td><td>{{ s.email }}</td><td>{{ s.is_active|yesno:"Yes,No" }}</td></tr>{% empty %}<tr><td colspan="3" class="muted">No staff accounts yet.</td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

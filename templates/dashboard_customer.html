@@ -1,0 +1,19 @@
+{% extends "app.html" %}
+{% load humanize %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold">Hello, {{ user.display_name }}</h1><p class="muted mb-6">Your subscriptions and invoices at a glance.</p>
+<div class="stats grid gap-4 sm:grid-cols-3">
+  <div class="glass panel stat tilt"><div class="muted text-sm">Active subscriptions</div><div class="v" data-count="{{ active_count }}">{{ active_count }}</div></div>
+  <div class="glass panel stat tilt"><div class="muted text-sm">Balance due</div><div class="v amber" data-count="{{ outstanding|floatformat:2 }}" data-prefix="₹">₹{{ outstanding|floatformat:0|intcomma }}</div></div>
+  <div class="glass panel stat tilt"><div class="muted text-sm">Overdue invoices</div><div class="v {% if overdue_count %}rose{% endif %}" data-count="{{ overdue_count }}">{{ overdue_count }}</div></div>
+</div>
+<div class="grid gap-4 lg:grid-cols-2 mt-4">
+  <div class="glass panel"><h2 class="font-semibold mb-3">Subscriptions</h2>
+    {% for s in subs %}<a href="{% url 'subscription_detail' s.pk %}" class="flex justify-between py-2 border-b border-white/5 text-sm"><span>{{ s.number }}<span class="muted block text-xs">{{ s.plan }}</span></span><span class="badge b-{{ s.status }} self-center">{{ s.get_status_display }}</span></a>
+    {% empty %}<p class="muted">No subscriptions yet. Ask your account manager to set one up.</p>{% endfor %}</div>
+  <div class="glass panel"><h2 class="font-semibold mb-3">Recent invoices</h2>
+    {% for i in recent %}<a href="{% url 'invoice_detail' i.pk %}" class="flex justify-between py-2 border-b border-white/5 text-sm"><span>{{ i.number }}<span class="muted block text-xs">due {{ i.due_date|date:"d M Y" }}</span></span><span>₹{{ i.total|floatformat:2|intcomma }} <span class="badge b-{{ i.display_status }}">{{ i.display_status|capfirst }}</span></span></a>
+    {% empty %}<p class="muted">No invoices yet.</p>{% endfor %}</div>
+</div>
+{% endblock %}

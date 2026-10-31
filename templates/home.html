@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Subscription billing that runs itself{% endblock %}
+{% block scene %}hero{% endblock %}
+{% block body %}
+<div class="layer min-h-screen flex flex-col">
+  <header class="flex items-center justify-between px-6 md:px-12 py-5">
+    <div class="logo"><span class="loop"></span>Brightloop</div>
+    <div class="flex gap-2"><a class="btn" href="{% url 'login' %}">Sign in</a><a class="btn btn-primary" href="{% url 'signup' %}">Create account</a></div>
+  </header>
+  <section class="flex-1 grid md:grid-cols-2 items-center gap-10 px-6 md:px-12 pb-16">
+    <div class="max-w-xl">
+      <h1 class="hero-title">Every renewal billed once, <span class="grad">right on time.</span></h1>
+      <p class="muted text-lg mt-5">Plans, subscriptions, invoices and payments in one place. Taxes and discounts apply themselves, and a re-run never bills anyone twice.</p>
+      <div class="flex flex-wrap gap-3 mt-8">
+        <a class="btn btn-primary" href="{% url 'signup' %}">Start as a customer</a>
+        <a class="btn" href="{% url 'login' %}">Sign in to your portal</a>
+      </div>
+      <div class="flex gap-8 mt-10 text-sm muted">
+        <div><div class="display text-2xl text-white">5</div>subscription states</div>
+        <div><div class="display text-2xl text-white">0</div>duplicate invoices</div>
+        <div><div class="display text-2xl text-white">3</div>roles, least privilege</div>
+      </div>
+    </div>
+    <div class="stage hidden md:flex justify-center">
+      <div class="deck float">
+        <div class="inv"></div><div class="inv"></div>
+        <div class="inv">
+          <div class="flex justify-between items-center"><span class="display font-bold">INV-000142</span><span class="badge b-paid">Paid</span></div>
+          <div class="muted text-xs mt-1">Acme Retail · Pro plan · monthly</div>
+          <div class="mt-6 text-sm grid gap-2">
+            <div class="flex justify-between"><span>Odoo ERP seat (Odoo) ×3</span><span>₹6,180</span></div>
+            <div class="flex justify-between"><span>Priority support ×1</span><span>₹2,500</span></div>
+            <div class="flex justify-between muted"><span>Launch 10% off</span><span>-₹868</span></div>
+            <div class="flex justify-between muted"><span>GST 18%</span><span>₹1,174</span></div>
+          </div>
+          <div class="flex justify-between items-end mt-8 border-t border-white/10 pt-4"><span class="muted text-sm">Total</span><span class="display text-3xl font-bold mint">₹8,986</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

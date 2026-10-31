@@ -1,0 +1,10 @@
+{% extends "app.html" %}{% load humanize %}
+{% block title %}Record payment{% endblock %}
+{% block content %}
+<a href="{% url 'invoice_detail' inv.pk %}" class="muted text-sm">&larr; {{ inv.number }}</a>
+<h1 class="text-2xl font-bold mt-2">Record payment</h1>
+<p class="muted mb-5">{{ inv.customer.name }} · balance ₹{{ inv.balance|floatformat:2|intcomma }}</p>
+<form method="post" class="glass panel max-w-xl grid gap-4">{% csrf_token %}
+{% for f in form %}<div><label class="label" for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{% for e in f.errors %}<div class="err">{{ e }}</div>{% endfor %}</div>{% endfor %}
+<div class="flex gap-3"><button class="btn btn-primary">Save payment</button><a class="btn" href="{% url 'invoice_detail' inv.pk %}">Cancel</a></div></form>
+{% endblock %}

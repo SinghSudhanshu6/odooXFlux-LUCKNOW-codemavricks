@@ -1,0 +1,15 @@
+{% extends "app.html" %}{% load humanize %}
+{% block title %}Invoices{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between flex-wrap gap-3 mb-5"><h1 class="text-2xl font-bold">{% if user.role == 'customer' %}My invoices{% else %}Invoices{% endif %}</h1>
+{% if user.role != 'customer' %}<form method="post" action="{% url 'billing_run' %}">{% csrf_token %}<button class="btn btn-primary">Run billing now</button></form>{% endif %}</div>
+<div class="flex flex-wrap gap-2 mb-4">
+  <a class="btn btn-sm {% if not f %}btn-primary{% endif %}" href="?">All</a>
+  {% for v,l in filters %}<a class="btn btn-sm {% if f == v %}btn-primary{% endif %}" href="?f={{ v }}">{{ l }}</a>{% endfor %}
+</div>
+<form class="mb-4 max-w-sm"><input type="hidden" name="f" value="{{ f }}"><input class="input" name="q" value="{{ q }}" placeholder="Search number or customer" aria-label="Search"></form>
+<div class="glass panel scroll"><table class="tbl"><thead><tr><th>Invoice</th><th>Customer</th><th>Period</th><th>Due</th><th>Status</th><th class="num">Total</th><th class="num">Balance</th></tr></thead><tbody>
+{% for i in page %}<tr><td><a class="mint" href="{% url 'invoice_detail' i.pk %}">{{ i.number }}</a></td><td>{{ i.customer.name }}</td><td>{{ i.period_start|date:"d M" }} to {{ i.period_end|date:"d M" }}</td><td>{{ i.due_date|date:"d M Y" }}</td><td><span class="badge b-{{ i.display_status }}">{{ i.display_status|capfirst }}</span></td><td class="num">₹{{ i.total|floatformat:2|intcomma }}</td><td class="num">₹{{ i.balance|floatformat:2|intcomma }}</td></tr>
+{% empty %}<tr><td colspan="7" class="muted">No invoices match.</td></tr>{% endfor %}</tbody></table></div>
+{% include "partials/pagination.html" %}
+{% endblock %}

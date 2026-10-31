@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Create account{% endblock %}
+{% block body %}
+<div class="layer min-h-screen grid place-items-center p-6">
+  <div class="glass panel authbox">
+    <a href="{% url 'home' %}" class="logo mb-5"><span class="loop"></span>Brightloop</a>
+    <h1 class="text-2xl font-bold mb-4">Create your account</h1>
+    <form method="post" class="grid gap-4">{% csrf_token %}
+      {% for f in form %}<div><label class="label" for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}
+        {% if f.help_text %}<div class="help">{{ f.help_text|safe }}</div>{% endif %}
+        {% for e in f.errors %}<div class="err">{{ e }}</div>{% endfor %}</div>{% endfor %}
+      <button class="btn btn-primary">Create account</button>
+    </form>
+    <p class="mt-5 text-sm muted">Already registered? <a class="mint" href="{% url 'login' %}">Sign in</a></p>
+  </div>
+</div>
+{% endblock %}

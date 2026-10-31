@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="topbar layer">
+  <div class="logo"><span class="loop"></span>Brightloop</div>
+  <button id="menu-btn" class="btn btn-sm" aria-label="Menu">Menu</button>
+</div>
+<div class="shell layer">
+  <aside id="side" class="side">
+    <a href="{% url 'dashboard' %}" class="logo mb-6 px-2"><span class="loop"></span>Brightloop</a>
+    <nav class="nav">
+      <a href="{% url 'dashboard' %}" class="{% if '/dashboard' in request.path %}active{% endif %}">Dashboard</a>
+      {% if user.role == 'customer' %}
+        <a href="{% url 'subscription_list' %}" class="{% if '/subscriptions' in request.path %}active{% endif %}">My subscriptions</a>
+        <a href="{% url 'invoice_list' %}" class="{% if '/invoices' in request.path %}active{% endif %}">My invoices</a>
+        <a href="{% url 'plan_list' %}" class="{% if '/plans' in request.path %}active{% endif %}">Plans</a>
+      {% else %}
+        <div class="grp">Billing</div>
+        <a href="{% url 'subscription_list' %}" class="{% if '/subscriptions' in request.path %}active{% endif %}">Subscriptions</a>
+        <a href="{% url 'invoice_list' %}" class="{% if '/invoices' in request.path or '/billing' in request.path %}active{% endif %}">Invoices</a>
+        <a href="{% url 'payment_list' %}" class="{% if '/payments' in request.path %}active{% endif %}">Payments</a>
+        <div class="grp">Catalog</div>
+        <a href="{% url 'product_list' %}" class="{% if '/products' in request.path %}active{% endif %}">Products</a>
+        <a href="{% url 'plan_list' %}" class="{% if '/plans' in request.path %}active{% endif %}">Plans</a>
+        <a href="{% url 'template_list' %}" class="{% if '/templates' in request.path %}active{% endif %}">Quotation templates</a>
+        <div class="grp">Rules</div>
+        <a href="{% url 'tax_list' %}" class="{% if '/taxes' in request.path %}active{% endif %}">Taxes</a>
+        <a href="{% url 'discount_list' %}" class="{% if '/discounts' in request.path %}active{% endif %}">Discounts</a>
+        {% if user.role == 'admin' %}
+        <div class="grp">Admin</div>
+        <a href="{% url 'staff_list' %}" class="{% if '/admin-panel' in request.path %}active{% endif %}">Staff</a>
+        {% endif %}
+      {% endif %}
+    </nav>
+    <div class="mt-8 px-2 text-sm">
+      <div class="font-semibold">{{ user.display_name }}</div>
+      <div class="muted text-xs mb-3">{{ user.get_role_display }}</div>
+      <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="btn btn-sm w-full">Sign out</button></form>
+    </div>
+  </aside>
+  <main class="main">
+    {% for m in messages %}<div class="toast {{ m.tags }}" role="status">{{ m }}</div>{% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+{% endblock %}

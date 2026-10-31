@@ -1,0 +1,12 @@
+{% extends "app.html" %}{% load humanize %}
+{% block title %}Products{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between flex-wrap gap-3 mb-5"><h1 class="text-2xl font-bold">Products</h1>
+{% if user.role == 'admin' %}<a class="btn btn-primary" href="{% url 'product_create' %}">New product</a>{% endif %}</div>
+<form class="mb-4 max-w-sm"><input class="input" name="q" value="{{ q }}" placeholder="Search products" aria-label="Search products"></form>
+<div class="glass panel scroll"><table class="tbl"><thead><tr><th>Name</th><th>Type</th><th class="num">Sales price</th><th class="num">Cost</th><th>Variants</th><th></th></tr></thead><tbody>
+{% for p in page %}<tr><td><a class="mint" href="{% url 'product_detail' p.pk %}">{{ p.name }}</a></td><td>{{ p.get_product_type_display }}</td><td class="num">₹{{ p.sales_price|floatformat:2|intcomma }}</td><td class="num">₹{{ p.cost_price|floatformat:2|intcomma }}</td><td>{{ p.nvar }}</td>
+<td class="num">{% if user.role == 'admin' %}<a class="btn btn-sm" href="{% url 'product_edit' p.pk %}">Edit</a>{% endif %}</td></tr>
+{% empty %}<tr><td colspan="6" class="muted">No products found.</td></tr>{% endfor %}</tbody></table></div>
+{% include "partials/pagination.html" %}
+{% endblock %}

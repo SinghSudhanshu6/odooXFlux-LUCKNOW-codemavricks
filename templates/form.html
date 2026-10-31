@@ -1,0 +1,23 @@
+{% extends "app.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<a href="{% url back %}" class="muted text-sm">&larr; Back</a>
+<h1 class="text-2xl font-bold mt-2">{{ title }}</h1>
+{% if hint %}<p class="muted mt-1">{{ hint }}</p>{% endif %}
+<form method="post" class="glass panel max-w-xl grid gap-4 mt-5">
+  {% csrf_token %}
+  {% for e in form.non_field_errors %}<div class="err">{{ e }}</div>{% endfor %}
+  {% for f in form %}
+    <div>
+      {% if f.field.widget.input_type == 'checkbox' %}
+        <label class="flex items-center gap-2 text-sm">{{ f }} {{ f.label }}</label>
+      {% else %}
+        <label class="label" for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}
+      {% endif %}
+      {% if f.help_text %}<div class="help">{{ f.help_text|safe }}</div>{% endif %}
+      {% for e in f.errors %}<div class="err">{{ e }}</div>{% endfor %}
+    </div>
+  {% endfor %}
+  <div class="flex gap-3"><button class="btn btn-primary">{{ submit|default:"Save" }}</button><a class="btn" href="{% url back %}">Cancel</a></div>
+</form>
+{% endblock %}

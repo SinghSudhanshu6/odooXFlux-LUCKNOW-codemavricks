@@ -1,0 +1,40 @@
+{% extends "app.html" %}{% load humanize %}
+{% block title %}{{ inv.number }}{% endblock %}
+{% block content %}
+<a href="{% url 'invoice_list' %}" class="muted text-sm">&larr; Invoices</a>
+<div class="flex items-start justify-between flex-wrap gap-3 mt-2 mb-5">
+  <div><h1 class="text-2xl font-bold">{{ inv.number }} <span class="badge b-{{ inv.display_status }} align-middle">{{ inv.display_status|capfirst }}</span></h1>
+  <p class="muted">{{ inv.customer }} · <a class="mint" href="{% url 'subscription_detail' inv.subscription_id %}">{{ inv.subscription.number }}</a></p></div>
+  <div class="flex flex-wrap gap-2">
+    <a class="btn" href="{% url 'invoice_pdf' inv.pk %}" target="_blank">Download PDF</a>
+    {% if user.role != 'customer' %}
+      {% if inv.status == 'draft' %}
+        <form method="post" action="{% url 'invoice_action' inv.pk 'confirm' %}">{% csrf_token %}<button class="btn btn-mint">Confirm invoice</button></form>
+      {% endif %}
+      {% if inv.status == 'confirmed' %}
+        <a class="btn btn-primary" href="{% url 'payment_new' inv.pk %}">Record payment</a>
+        <form method="post" action="{% url 'invoice_action' inv.pk 'send' %}">{% csrf_token %}<button class="btn">Email to customer</button></form>
+      {% endif %}
+      {% if inv.status == 'draft' or inv.status == 'confirmed' %}
+        <form method="post" action="{% url 'invoice_action' inv.pk 'cancel' %}" data-confirm="Cancel this invoice?">{% csrf_token %}<button class="btn btn-danger">Cancel</button></form>
+      {% endif %}
+    {% endif %}
+  </div>
+</div>
+<div class="grid gap-4 md:grid-cols-3 mb-4">
+  <div class="glass panel tilt"><div class="muted text-sm">Period</div><div class="font-semibold">{{ inv.period_start|date:"d M" }} to {{ inv.period_end|date:"d M Y" }}</div></div>
+  <div class="glass panel tilt"><div class="muted text-sm">Due date</div><div class="font-semibold {% if inv.is_overdue %}rose{% endif %}">{{ inv.due_date|date:"d M Y" }}</div></div>
+  <div class="glass panel tilt"><div class="muted text-sm">Balance</div><div class="display text-2xl font-bold {% if inv.balance %}amber{% else %}mint{% endif %}">₹{{ inv.balance|floatformat:2|intcomma }}</div></div>
+</div>
+<div class="glass panel scroll mb-4"><table class="tbl"><thead><tr><th>Item</th><th class="num">Qty</th><th class="num">Price</th><th class="num">Discount</th><th class="num">Tax</th><th class="num">Amount</th></tr></thead><tbody>
+{% for l in lines %}<tr><td>{{ l.description }}</td><td class="num">{{ l.quantity }}</td><td class="num">₹{{ l.unit_price|floatformat:2|intcomma }}</td><td class="num">₹{{ l.discount|floatformat:2 }}</td><td class="num">{{ l.tax_rate }}%</td><td class="num">₹{{ l.amount|floatformat:2|intcomma }}</td></tr>{% endfor %}</tbody></table>
+<div class="ml-auto mt-4 grid gap-1 text-sm" style="max-width:280px">
+  <div class="flex justify-between"><span class="muted">Subtotal</span>₹{{ inv.subtotal|floatformat:2|intcomma }}</div>
+  <div class="flex justify-between"><span class="muted">Discount</span>-₹{{ inv.discount_total|floatformat:2|intcomma }}</div>
+  <div class="flex justify-between"><span class="muted">Tax</span>₹{{ inv.tax_total|floatformat:2|intcomma }}</div>
+  <div class="flex justify-between display text-lg font-bold border-t border-white/10 pt-2 mt-1"><span>Total</span>₹{{ inv.total|floatformat:2|intcomma }}</div>
+  <div class="flex justify-between"><span class="muted">Paid</span>₹{{ inv.amount_paid|floatformat:2|intcomma }}</div></div></div>
+<div class="glass panel scroll"><h2 class="font-semibold mb-3">Payments</h2><table class="tbl"><thead><tr><th>Date</th><th>Method</th><th>Note</th><th>Recorded by</th><th class="num">Amount</th></tr></thead><tbody>
+{% for p in payments %}<tr><td>{{ p.date|date:"d M Y" }}</td><td>{{ p.get_method_display }}</td><td>{{ p.note|default:"-" }}</td><td>{{ p.recorded_by.display_name|default:"-" }}</td><td class="num">₹{{ p.amount|floatformat:2|intcomma }}</td></tr>
+{% empty %}<tr><td colspan="5" class="muted">No payments recorded yet.</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}
