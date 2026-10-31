@@ -1,1 +1,1 @@
-# odooXFlux-LUCKNOW-codemavricks
+# odooXFlux-LUCKNOW-code Mavricks
